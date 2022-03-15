@@ -179,6 +179,6 @@ app.get("/daily/:id", (req, res) => {
 })
 
 
-app.listen(8002, () => {
+app.listen(process.env.PORT||8002, () => {
     console.log("Started");
 });
