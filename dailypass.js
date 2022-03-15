@@ -127,7 +127,7 @@ app.get("/scheduledUnlock", (req, res) => {
                     id: doc[i]._id,
                     content: doc[i].content
                 }
-                axios.get("http://localhost:8000/user/" + dataObj.id).then((response) => {
+                axios.get("https://pratilipi-microservices.herokuapp.com/userService/user/" + dataObj.id).then((response) => {
                     var extract = response.data.createdAt;
                     var userDate = new Date(extract);
                     var contDate;
