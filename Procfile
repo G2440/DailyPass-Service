@@ -1,1 +1,1 @@
-web : node dailypass.js
+web: node dailypass.js
