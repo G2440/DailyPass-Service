@@ -41,7 +41,7 @@ app.post("/systemUnlock/:id", (req, res) => {
         _id: req.params.id,
         content: []
     }
-    axios.get("http://localhost:8001/allSeries").then((response) => {
+    axios.get("https://pratilipi-microservices.herokuapp.com/contentService/allSeries").then((response) => {
         res.send((response.data));
         for (var i = 0; i < response.data.length; i++) {
             var obj1 = {
@@ -168,7 +168,7 @@ app.get("/daily/:id", (req, res) => {
                 data: doc.content[i]
             }
 
-            await axios.get("http://localhost:8001/pickcontent/" + doc.content[i]._id).then((response) => {
+            await axios.get("https://pratilipi-microservices.herokuapp.com/contentService/pickcontent/" + doc.content[i]._id).then((response) => {
                 res.write("Name of the Series  : " + response.data.bookName);
             })
             res.write("Number of Chapters Unlocked " + unC.data.NumChapUn)
