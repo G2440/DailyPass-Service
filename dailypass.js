@@ -160,7 +160,7 @@ app.get("/scheduledUnlock", (req, res) => {
 
 
 app.get("/daily/:id", (req, res) => {
-    axios.get("http://localhost:8002/scheduledUnlock");
+    axios.get("https://pratilipi-microservices.herokuapp.com/dailypassService/scheduledUnlock");
 
     DP.findById(req.params.id, async (err, doc) => {
         for (var i = 0; i < doc.content.length; i++) {
