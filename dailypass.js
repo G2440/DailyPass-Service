@@ -77,6 +77,7 @@ app.post("/userAdd", (req, res) => {
     var s = new DP(newuserCon);
     s.save().then(() => {
         console.log("Added To the DB");
+        return res.status(200).json({success : true});
     }).catch((err) => {
         if (err){
         console.log("Error in Adding to DB");
