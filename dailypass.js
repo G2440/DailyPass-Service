@@ -24,10 +24,10 @@ mongoose.connect(db, {
     console.log(err);
 });
 
-app.post("/add/:id/:id1/:num", (req, res) => {
+app.post("/add/:id/:id1", (req, res) => {
     var newObj = {
         _id: req.params.id1,
-        NumChapUn: req.params.num
+        NumChapUn: 4
     };
     DP.findByIdAndUpdate(
         req.params.id,
