@@ -164,7 +164,7 @@ app.get("/scheduledUnlock", (req, res) => {
 
 
 app.get("/daily/:id", (req, res) => {
-    axios.get("https://pratilipi-microservices.herokuapp.com/dailypassService/scheduledUnlock");
+    axios.get("https://pratilipi-microservices.herokuapp.com/dailypassService/scheduledUnlock").then(()=>{
 
     DP.findById(req.params.id, async (err, doc) => {
         for (var i = 0; i < doc.content.length; i++) {
@@ -178,6 +178,7 @@ app.get("/daily/:id", (req, res) => {
             res.write("Number of Chapters Unlocked " + unC.data.NumChapUn)
         }
         res.end();
+    })
     })
 
 })
