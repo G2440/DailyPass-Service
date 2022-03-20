@@ -6,6 +6,7 @@ var dpSchema = new mongoose.Schema({
     {
         _id: String,
         NumChapUn : Number,
+        uncCounter : {type : Number , default : 0},
         Addedon: {type: Date , default: Date.now()}
     }
 ]
