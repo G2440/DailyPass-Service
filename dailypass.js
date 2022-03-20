@@ -72,6 +72,22 @@ app.get("/dailydata/:id", (req, res) => {
         if (err) throw err;
     })
 })
+
+app.get("/pickseries/:id/:id1", (req, res) => {
+    DP.findById(req.params.id).then((user) => {
+        if (user) {
+            for (var i = 0; i < user.content.length; i++)
+                if (user.content[i]._id == req.params.id1) {
+                    console.log(user.content[i])
+                    return res.json(user.content[i]);
+                }
+        }
+        else res.sendStatus(404);
+    }).catch(err => {
+        if (err) throw err;
+    })
+})
+
 app.post("/userAdd", (req, res) => {
     var newuserCon = req.body;
     var s = new DP(newuserCon);
@@ -98,24 +114,26 @@ app.get("/all", (req, res) => {
 app.get("/unlock/:id/:id1", (req, res) => {
 
     DP.find({ _id: req.params.id, "content._id": req.params.id1 }, function (err, docs) {
-        
-        DP.findById(req.params.id , (err,ddata)=>{
-            if(err)
-            console.log(err);
-            else{
-                var val =0;
-                for(var i =0 ; i < ddata.content.length ; i++){
-                    if(ddata.content[i]._id == req.params.id1){
-                    val = ddata.content[i].NumChapUn;
-                    break;
+
+        DP.findById(req.params.id, (err, ddata) => {
+            if (err)
+                console.log(err);
+            else {
+                var val = 0;
+                var val1 = 0;
+                for (var i = 0; i < ddata.content.length; i++) {
+                    if (ddata.content[i]._id == req.params.id1) {
+                        val = ddata.content[i].uncCounter;
+                        val1 = ddata.content[i].NumChapUn;
+                        break;
                     }
                 }
-                DP.findOneAndUpdate({ _id: req.params.id, "content._id": req.params.id1 }, { "content.$.NumChapUn": val + 1 }, { new: true }, (err, doc) => {
+                DP.findOneAndUpdate({ _id: req.params.id, "content._id": req.params.id1 }, { "content.$.uncCounter": val + 1, "content.$.NumChapUn": val1 + 1, }, { new: true }, (err, doc) => {
                     if (err) {
                         console.log(err);
                     }
                     res.send(doc);
-                });        
+                });
             }
         })
 
@@ -123,7 +141,7 @@ app.get("/unlock/:id/:id1", (req, res) => {
 })
 
 app.get("/scheduledUnlock", (req, res) => {
-    DP.find({}, function (err, doc) {
+    DP.find({}, async function (err, doc) {
         if (err) console.log(err);
         else {
             for (var i = 0; i < doc.length; i++) {
@@ -131,7 +149,9 @@ app.get("/scheduledUnlock", (req, res) => {
                     id: doc[i]._id,
                     content: doc[i].content
                 }
-                axios.get("https://pratilipi-microservices.herokuapp.com/userService/user/" + dataObj.id).then((response) => {
+
+
+                await axios.get("https://pratilipi-microservices.herokuapp.com/userService/user/" + dataObj.id).then((response) => {
                     var extract = response.data.createdAt;
                     var userDate = new Date(extract);
                     var contDate;
@@ -142,47 +162,41 @@ app.get("/scheduledUnlock", (req, res) => {
                         contDate = new Date(dataObj.content[j].Addedon);
                         time = Math.abs(contDate.getTime() - userDate.getTime());
                         dayTime = time / (1000 * 3600 * 24)
-                        var finVal = Math.floor(dayTime);
+                        finVal = Math.floor(dayTime);
                         if (finVal > 0) {
-                            var val = 4 + finVal;
-                           
+                            var val = 4 + finVal + dataObj.content[j].uncCounter;
+
                             DP.findOneAndUpdate({ _id: response.data._id, "content._id": dataObj.content[j]._id }, { "content.$.NumChapUn": val }, { new: true }, (err, doc) => {
                                 if (err) {
                                     console.log(err);
                                 }
-                                
                             });
                         }
                     }
-
-
                 })
             }
         }
     })
-        return res.status(200).json({success:true});
-
+    return res.status(200).json({ success: true });
 })
 
 
 app.get("/daily/:id", (req, res) => {
-    axios.get("https://pratilipi-microservices.herokuapp.com/dailypassService/scheduledUnlock").then(()=>{
+    axios.get("https://pratilipi-microservices.herokuapp.com/dailypassService/scheduledUnlock").then(() => {
+        DP.findById(req.params.id, async (err, doc) => {
+            for (var i = 0; i < doc.content.length; i++) {
+                var unC = {
+                    data: doc.content[i]
+                }
 
-    DP.findById(req.params.id, async (err, doc) => {
-        for (var i = 0; i < doc.content.length; i++) {
-            var unC = {
-                data: doc.content[i]
+                await axios.get("https://pratilipi-microservices.herokuapp.com/contentService/pickcontent/" + doc.content[i]._id).then((response) => {
+                    res.write("Name of the Series  : " + response.data.bookName + '\n');
+                })
+                res.write("Number of Chapters Unlocked " + unC.data.NumChapUn + '\n')
             }
-
-            await axios.get("https://pratilipi-microservices.herokuapp.com/contentService/pickcontent/" + doc.content[i]._id).then((response) => {
-                res.write("Name of the Series  : " + response.data.bookName);
-            })
-            res.write("Number of Chapters Unlocked " + unC.data.NumChapUn)
-        }
-        res.end();
+            res.end();
+        })
     })
-    })
-
 })
 
 
